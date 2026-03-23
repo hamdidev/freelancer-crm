@@ -34,3 +34,31 @@ export interface PageProps<
         error: string | null;
     };
 }
+
+export type LeadStatus =
+    | "new"
+    | "contacted"
+    | "proposal_sent"
+    | "negotiation"
+    | "won"
+    | "lost";
+
+export interface Lead {
+    id: number;
+    user_id: number;
+    client_id: number | null;
+    title: string;
+    status: LeadStatus;
+    source: string | null;
+    value_estimate: number; // cents
+    position: number;
+    notes: string | null;
+    won_at: string | null;
+    lost_at: string | null;
+    created_at: string;
+    client?: {
+        id: number;
+        contact_name: string;
+        company_name: string | null;
+    };
+}

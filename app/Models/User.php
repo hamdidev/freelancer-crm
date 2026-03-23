@@ -50,4 +50,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Client::class);
     }
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
 }

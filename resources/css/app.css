@@ -1,11 +1,86 @@
-@import 'tailwindcss';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@import "tailwindcss";
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* ── Primary: Navy Blue ─────────────────────────────── */
+    --color-primary: #1a4f8b;
+    --color-primary-container: #d0e4ff;
+    --color-primary-fixed: #d0e4ff;
+    --color-on-primary: #ffffff;
+    --color-on-primary-container: #001c3a;
+    --color-on-primary-fixed-variant: #1a4f8b;
+
+    /* ── Secondary: Steel Blue ──────────────────────────── */
+    --color-secondary: #475569;
+    --color-secondary-container: #d5e3f7;
+    --color-secondary-fixed: #d5e3f7;
+    --color-on-secondary: #ffffff;
+    --color-on-secondary-container: #0f2744;
+    --color-on-secondary-fixed-variant: #2e4460;
+
+    /* ── Tertiary: Deep Navy ─────────────────────────────── */
+    --color-tertiary: #0f172a;
+    --color-tertiary-fixed: #e2e8f0;
+    --color-on-tertiary: #ffffff;
+    --color-on-tertiary-fixed-variant: #1e293b;
+
+    /* ── Surface / Neutral ───────────────────────────────── */
+    --color-surface: #f8fafc;
+    --color-surface-container: #eff3f8;
+    --color-surface-container-low: #f4f7fb;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-container-high: #e4eaf2;
+    --color-surface-container-highest: #d9e2ed;
+    --color-on-surface: #0f172a;
+    --color-on-surface-variant: #475569;
+
+    /* ── Outline ─────────────────────────────────────────── */
+    --color-outline: #7a92ad;
+    --color-outline-variant: #c4d4e3;
+
+    /* ── Typography ──────────────────────────────────────── */
+    --font-sans: "Inter", system-ui, sans-serif;
+    --font-headline: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+
+    /* ── Border Radius ───────────────────────────────────── */
+    --radius-card: 0.75rem;
+    --radius-chip: 0.5rem;
+
+    /* ── Shadows ─────────────────────────────────────────── */
+    --shadow-surface:
+        0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-elevated:
+        0 4px 24px rgba(26, 79, 139, 0.08), 0 1px 4px rgba(15, 23, 42, 0.04);
+    --shadow-primary: 0 8px 24px rgba(26, 79, 139, 0.2);
+}
+
+@layer base {
+    html {
+        font-family: "Inter", system-ui, sans-serif;
+        color: #0f172a;
+        background-color: #f8fafc;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .headline {
+        font-family: "Inter", system-ui, sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-primary text-on-primary font-semibold px-4 py-2 rounded-card
+           hover:opacity-90 active:scale-[0.98] transition-all;
+    }
+
+    .btn-outlined {
+        @apply bg-transparent text-primary font-semibold px-4 py-2 rounded-card
+           border border-primary hover:bg-primary/5 transition-all;
+    }
+
+    .card {
+        @apply bg-surface-container-lowest rounded-card p-6;
+    }
 }

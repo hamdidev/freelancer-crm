@@ -1,0 +1,5 @@
+const Ziggy = {"url":"http:\/\/localhost:8000","port":8000,"defaults":{},"routes":{"boost.browser-logs":{"uri":"_boost\/browser-logs","methods":["POST"]},"login":{"uri":"login","methods":["GET","HEAD"]},"register":{"uri":"register","methods":["GET","HEAD"]},"logout":{"uri":"logout","methods":["POST"]},"dashboard":{"uri":"dashboard","methods":["GET","HEAD"]},"leads.index":{"uri":"leads","methods":["GET","HEAD"]},"leads.store":{"uri":"leads","methods":["POST"]},"leads.update":{"uri":"leads\/{lead}","methods":["PATCH"],"parameters":["lead"],"bindings":{"lead":"id"}},"leads.status":{"uri":"leads\/{lead}\/status","methods":["PATCH"],"parameters":["lead"],"bindings":{"lead":"id"}},"leads.destroy":{"uri":"leads\/{lead}","methods":["DELETE"],"parameters":["lead"],"bindings":{"lead":"id"}},"storage.local":{"uri":"storage\/{path}","methods":["GET","HEAD"],"wheres":{"path":".*"},"parameters":["path"]},"storage.local.upload":{"uri":"storage\/{path}","methods":["PUT"],"wheres":{"path":".*"},"parameters":["path"]}}};
+if (typeof window !== 'undefined' && typeof window.Ziggy !== 'undefined') {
+  Object.assign(Ziggy.routes, window.Ziggy.routes);
+}
+export { Ziggy };
