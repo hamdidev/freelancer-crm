@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\ProposalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,4 +28,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
     Route::patch('/leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.status');
     Route::delete('/leads/{lead}', [LeadController::class, 'destroy'])->name('leads.destroy');
+
+
+
+    // Proposals (freelancer)
+    Route::get('/proposals',                  [ProposalController::class, 'index'])->name('proposals.index');
+    Route::get('/proposals/create',           [ProposalController::class, 'create'])->name('proposals.create');
+    Route::post('/proposals',                 [ProposalController::class, 'store'])->name('proposals.store');
+    Route::get('/proposals/{proposal}/edit',  [ProposalController::class, 'edit'])->name('proposals.edit');
+    Route::patch('/proposals/{proposal}',     [ProposalController::class, 'update'])->name('proposals.update');
+    Route::post('/proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
+    Route::delete('/proposals/{proposal}',    [ProposalController::class, 'destroy'])->name('proposals.destroy');
 });
+// Public proposal view (no auth required)
+Route::get('/p/{token}',        [ProposalController::class, 'view'])->name('proposals.public');
+Route::post('/p/{token}/action', [ProposalController::class, 'clientAction'])->name('proposals.action');

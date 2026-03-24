@@ -62,3 +62,60 @@ export interface Lead {
         company_name: string | null;
     };
 }
+export type ProposalStatus =
+    | "draft"
+    | "sent"
+    | "viewed"
+    | "accepted"
+    | "declined"
+    | "expired";
+
+export interface PricingItem {
+    type: "pricing_item";
+    attrs: {
+        description: string;
+        quantity: number;
+        unit_price_cents: number;
+    };
+}
+
+export type ContentBlock =
+    | { type: "paragraph"; content: { type: "text"; text: string }[] }
+    | {
+          type: "heading";
+          attrs: { level: number };
+          content: { type: "text"; text: string }[];
+      }
+    | PricingItem;
+
+export interface Proposal {
+    id: number;
+    user_id: number;
+    client_id: number;
+    lead_id: number | null;
+    title: string;
+    content: ContentBlock[];
+    status: ProposalStatus;
+    total_cents: number;
+    currency: string;
+    valid_until: string | null;
+    token: string;
+    viewed_at: string | null;
+    accepted_at: string | null;
+    declined_at: string | null;
+    client_note: string | null;
+    pdf_path: string | null;
+    created_at: string;
+    client?: {
+        id: number;
+        contact_name: string;
+        company_name: string | null;
+    };
+    user?: {
+        id: number;
+        name: string;
+        company_name: string | null;
+        brand_color: string;
+    };
+}
+

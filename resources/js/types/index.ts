@@ -1,4 +1,4 @@
-import type { LeadStatus } from "./index.d.ts";
+import type { LeadStatus, ProposalStatus } from "./index.d.ts";
 
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
     new: "New",
@@ -16,4 +16,22 @@ export const LEAD_STATUS_COLORS: Record<LeadStatus, string> = {
     negotiation: "bg-orange-100 text-orange-700",
     won: "bg-green-100 text-green-700",
     lost: "bg-red-100 text-red-700",
+};
+
+export const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, string> = {
+    draft: "Draft",
+    sent: "Sent",
+    viewed: "Viewed",
+    accepted: "Accepted",
+    declined: "Declined",
+    expired: "Expired",
+};
+
+export const PROPOSAL_STATUS_COLORS: Record<ProposalStatus, string> = {
+    draft: "bg-gray-100 text-gray-700",
+    sent: "bg-blue-100 text-blue-700",
+    viewed: "bg-violet-100 text-violet-700",
+    accepted: "bg-green-100 text-green-700",
+    declined: "bg-red-100 text-red-700",
+    expired: "bg-amber-100 text-amber-700",
 };
