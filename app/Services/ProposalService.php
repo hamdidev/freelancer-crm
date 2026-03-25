@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Enums\ProposalStatus;
 use App\Events\ProposalActioned;
+use App\Mail\ProposalActionedMail;
+use App\Mail\ProposalMail;
 use App\Models\Proposal;
 use App\StateMachines\ProposalStateMachine;
 use Illuminate\Support\Facades\Mail;
@@ -20,8 +22,9 @@ class ProposalService
 
         $proposal->update(['status' => ProposalStatus::Sent]);
 
-        // TODO Phase 3 extension: Mail::to($proposal->client->email)->send(new ProposalMail($proposal));
-        // Queued mail will be added when we set up the mail driver
+        // Send email to client with proposal link
+        Mail::to($proposal->client->email)
+            ->send(new ProposalMail($proposal));
     }
 
     /**
@@ -58,7 +61,14 @@ class ProposalService
 
         broadcast(new ProposalActioned($proposal, 'accepted'))->toOthers();
 
-        // TODO Phase 5: dispatch(new GenerateContractJob($proposal));
+
+        // Send email to client
+        Mail::to($proposal->client->email)
+            ->send(new ProposalMail($proposal));
+
+        // Notify freelancer
+        Mail::to($proposal->user->email)
+            ->send(new ProposalActionedMail($proposal, 'accepted'));
     }
 
     /**
@@ -76,6 +86,10 @@ class ProposalService
         ]);
 
         broadcast(new ProposalActioned($proposal, 'declined'))->toOthers();
+
+        // Notify freelancer
+        Mail::to($proposal->user->email)
+            ->send(new ProposalActionedMail($proposal, 'declined'));
     }
 
     /**
