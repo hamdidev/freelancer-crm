@@ -5,22 +5,22 @@ namespace App\Events;
 use App\Models\Proposal;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ProposalActioned implements ShouldBroadcast
+class ProposalActioned implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
         public Proposal $proposal,
-        public string   $action  // 'accepted' | 'declined'
+        public string $action  // 'accepted' | 'declined'
     ) {}
 
     public function broadcastOn(): PrivateChannel
     {
-        return new PrivateChannel('user.' . $this->proposal->user_id);
+        return new PrivateChannel('user.'.$this->proposal->user_id);
     }
 
     public function broadcastAs(): string
@@ -31,10 +31,10 @@ class ProposalActioned implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'proposal_id'    => $this->proposal->id,
+            'proposal_id' => $this->proposal->id,
             'proposal_title' => $this->proposal->title,
-            'client_name'    => $this->proposal->client->contact_name,
-            'action'         => $this->action,
+            'client_name' => $this->proposal->client->contact_name,
+            'action' => $this->action,
         ];
     }
 }

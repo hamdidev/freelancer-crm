@@ -9,5 +9,5 @@
         "paths": { "@/*": ["resources/js/*"] },
         "types": ["vite/client", "node"]
     },
-    "include": ["resources/js/**/*"]
+    "include": ["resources/js/**/*", "resources/js/types/**/*"]
 }

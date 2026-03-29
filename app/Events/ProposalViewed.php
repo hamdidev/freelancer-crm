@@ -5,11 +5,11 @@ namespace App\Events;
 use App\Models\Proposal;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ProposalViewed implements ShouldBroadcast
+class ProposalViewed implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,7 +18,7 @@ class ProposalViewed implements ShouldBroadcast
     public function broadcastOn(): PrivateChannel
     {
         // Broadcasts to the freelancer's private channel
-        return new PrivateChannel('user.' . $this->proposal->user_id);
+        return new PrivateChannel('user.'.$this->proposal->user_id);
     }
 
     public function broadcastAs(): string
@@ -29,10 +29,10 @@ class ProposalViewed implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'proposal_id'   => $this->proposal->id,
+            'proposal_id' => $this->proposal->id,
             'proposal_title' => $this->proposal->title,
-            'client_name'   => $this->proposal->client->contact_name,
-            'viewed_at'     => $this->proposal->viewed_at->toISOString(),
+            'client_name' => $this->proposal->client->contact_name,
+            'viewed_at' => $this->proposal->viewed_at->toISOString(),
         ];
     }
 }

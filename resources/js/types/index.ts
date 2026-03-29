@@ -1,4 +1,124 @@
-import type { LeadStatus, ProposalStatus } from "./index.d.ts";
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    timezone: string;
+    currency: string;
+    brand_color: string;
+    logo_path: string | null;
+    company_name: string | null;
+    steuernummer: string | null;
+    ust_idnr: string | null;
+}
+
+export interface Client {
+    id: number;
+    user_id: number;
+    company_name: string | null;
+    contact_name: string;
+    email: string;
+    phone: string | null;
+    country: string;
+    display_name: string;
+}
+
+export interface PageProps<
+    T extends Record<string, unknown> = Record<string, unknown>,
+> {
+    auth: {
+        user: User | null;
+        client: Client | null;
+    };
+    flash: {
+        success: string | null;
+        error: string | null;
+    };
+}
+
+export type LeadStatus =
+    | "new"
+    | "contacted"
+    | "proposal_sent"
+    | "negotiation"
+    | "won"
+    | "lost";
+
+export interface Lead {
+    id: number;
+    user_id: number;
+    client_id: number | null;
+    title: string;
+    status: LeadStatus;
+    source: string | null;
+    value_estimate: number;
+    position: number;
+    notes: string | null;
+    won_at: string | null;
+    lost_at: string | null;
+    created_at: string;
+    client?: {
+        id: number;
+        contact_name: string;
+        company_name: string | null;
+    };
+}
+
+export type ProposalStatus =
+    | "draft"
+    | "sent"
+    | "viewed"
+    | "accepted"
+    | "declined"
+    | "expired";
+
+export interface PricingItem {
+    type: "pricing_item";
+    attrs: {
+        description: string;
+        quantity: number;
+        unit_price_cents: number;
+    };
+}
+
+export type ContentBlock =
+    | { type: "paragraph"; content: { type: "text"; text: string }[] }
+    | {
+          type: "heading";
+          attrs: { level: number };
+          content: { type: "text"; text: string }[];
+      }
+    | PricingItem;
+
+export interface Proposal {
+    id: number;
+    user_id: number;
+    client_id: number;
+    lead_id: number | null;
+    title: string;
+    content: ContentBlock[];
+    status: ProposalStatus;
+    total_cents: number;
+    currency: string;
+    valid_until: string | null;
+    token: string;
+    viewed_at: string | null;
+    accepted_at: string | null;
+    declined_at: string | null;
+    client_note: string | null;
+    pdf_path: string | null;
+    created_at: string;
+    client?: {
+        id: number;
+        contact_name: string;
+        company_name: string | null;
+    };
+    user?: {
+        id: number;
+        name: string;
+        company_name: string | null;
+        brand_color: string;
+    };
+}
 
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
     new: "New",
@@ -34,4 +154,72 @@ export const PROPOSAL_STATUS_COLORS: Record<ProposalStatus, string> = {
     accepted: "bg-green-100 text-green-700",
     declined: "bg-red-100 text-red-700",
     expired: "bg-amber-100 text-amber-700",
+};
+export type InvoiceStatus =
+    | "draft"
+    | "sent"
+    | "viewed"
+    | "partial"
+    | "paid"
+    | "overdue"
+    | "void";
+
+export interface InvoiceItem {
+    id?: number;
+    description: string;
+    quantity: number;
+    unit_price_cents: number;
+    total_cents: number;
+    position: number;
+    time_entry_ids?: number[] | null;
+}
+
+export interface Invoice {
+    id: number;
+    user_id: number;
+    client_id: number;
+    project_id: number | null;
+    number: string;
+    status: InvoiceStatus;
+    currency: string;
+    subtotal_cents: number;
+    tax_rate: number;
+    tax_cents: number;
+    total_cents: number;
+    issue_date: string;
+    due_at: string;
+    service_date: string | null;
+    paid_at: string | null;
+    viewed_at: string | null;
+    stripe_payment_intent_id: string | null;
+    notes: string | null;
+    recurring: boolean;
+    recurring_interval: "weekly" | "monthly" | null;
+    created_at: string;
+    client?: {
+        id: number;
+        contact_name: string;
+        company_name: string | null;
+    };
+    items?: InvoiceItem[];
+}
+
+export const INVOICE_STATUS_COLORS: Record<InvoiceStatus, string> = {
+    draft: "bg-gray-100 text-gray-600",
+    sent: "bg-blue-100 text-blue-700",
+    viewed: "bg-violet-100 text-violet-700",
+    partial: "bg-amber-100 text-amber-700",
+    paid: "bg-green-100 text-green-700",
+    overdue: "bg-red-100 text-red-700",
+    void: "bg-slate-100 text-slate-600",
+};
+
+export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
+    draft: "Draft",
+    sent: "Sent",
+    viewed: "Viewed",
+    partial: "Partial",
+    paid: "Paid",
+    overdue: "Overdue",
+    void: "Void",
 };

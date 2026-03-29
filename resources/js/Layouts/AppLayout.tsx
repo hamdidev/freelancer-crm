@@ -1,25 +1,23 @@
-import { type ReactNode } from "react";
+import { Toaster } from "react-hot-toast";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
+import { type PageProps } from "@/types";
 import { usePage } from "@inertiajs/react";
 import Sidebar from "@/Components/Sidebar";
 import TopBar from "@/Components/TopBar";
-import { type PageProps } from "@/types";
 
-interface Props {
-    children: ReactNode;
-    title?: string;
-}
+export default function AppLayout({ children }: Props) {
+    const { auth, flash } = usePage<PageProps>().props;
 
-export default function AppLayout({ children, title }: Props) {
-    const { flash } = usePage<PageProps>().props;
+    // Wire up real-time notifications
+    useRealtimeNotifications(auth.user);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-surface">
             <Sidebar />
 
             <div className="ml-64 flex flex-col min-h-screen">
                 <TopBar />
 
-                {/* Flash messages */}
                 {flash.success && (
                     <div className="mx-8 mt-4 p-3 rounded-lg bg-green-50 text-green-800 text-sm border border-green-200">
                         {flash.success}
@@ -31,9 +29,11 @@ export default function AppLayout({ children, title }: Props) {
                     </div>
                 )}
 
-                {/* Page content */}
                 <main className="flex-1 px-8 py-6">{children}</main>
             </div>
+
+            {/* Global toast notifications */}
+            <Toaster position="bottom-right" toastOptions={{ duration: 5000 }} />
         </div>
     );
 }
