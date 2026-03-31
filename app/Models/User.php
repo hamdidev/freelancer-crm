@@ -45,7 +45,6 @@ class User extends Authenticatable
         return LogOptions::defaults()->logFillable();
     }
 
-    // Relations — more added per phase
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
@@ -64,5 +63,10 @@ class User extends Authenticatable
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
     }
 }

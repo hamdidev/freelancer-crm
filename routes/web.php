@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Models\Contract;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,15 +51,45 @@ Route::middleware('auth')->group(function () {
     Route::patch('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+
+    // Contracts
+    Route::get('/contracts', [ContractController::class, 'index'])->name('contracts.index');
+    Route::get('/contracts/create', [ContractController::class, 'create'])->name('contracts.create');
+    Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
+    Route::get('/contracts/{contract}/edit', [ContractController::class, 'edit'])->name('contracts.edit');
+    Route::patch('/contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
+    Route::post('/contracts/{contract}/send', [ContractController::class, 'send'])->name('contracts.send');
+    Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
 });
+
+// Public contract signing (no auth)
+Route::get('/contracts/{token}/sign', [ContractController::class, 'sign'])->name('contracts.sign');
+Route::post('/contracts/{token}/sign', [ContractController::class, 'submitSignature'])->name('contracts.submit');
+Route::get('/contracts/{token}/signature', function (string $token) {
+    $contract = Contract::where('token', $token)->firstOrFail();
+
+    if (! $contract->signature_path) {
+        abort(404);
+    }
+
+    $path = storage_path('app/'.$contract->signature_path);
+
+    if (! file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path, ['Content-Type' => 'image/png']);
+})->name('contracts.signature');
 // Public proposal view (no auth required)
 Route::get('/p/{token}', [ProposalController::class, 'view'])->name('proposals.public');
 Route::post('/p/{token}/action', [ProposalController::class, 'clientAction'])->name('proposals.action');
 
 // ── Client portal routes ──────────────────────────────────────
 Route::get('/portal/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])
-    ->middleware('auth:client')
     ->name('portal.invoices.pay');
+
+Route::post('/portal/invoices/{invoice}/confirm-payment', [InvoiceController::class, 'confirmPayment'])
+    ->name('portal.invoices.confirm-payment');
 
 // ── Stripe webhook — NO auth, NO CSRF ────────────────────────
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])

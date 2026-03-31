@@ -117,19 +117,53 @@ class InvoiceService
     }
 
     /**
-     * Create Stripe PaymentIntent for the invoice total.
+     * Create or retrieve an existing Stripe PaymentIntent for the invoice.
      */
     public function createPaymentIntent(Invoice $invoice): string
     {
+        if ($invoice->stripe_payment_intent_id) {
+            $intent = $this->stripe->paymentIntents->retrieve($invoice->stripe_payment_intent_id);
+
+            if (! in_array($intent->status, ['succeeded', 'canceled'])) {
+                return $intent->client_secret;
+            }
+        }
+
         $intent = $this->stripe->paymentIntents->create([
             'amount' => $invoice->total_cents,
             'currency' => strtolower($invoice->currency),
+            'automatic_payment_methods' => ['enabled' => true],
             'metadata' => ['invoice_id' => $invoice->id],
         ]);
 
         $invoice->update(['stripe_payment_intent_id' => $intent->id]);
 
         return $intent->client_secret;
+    }
+
+    /**
+     * Verify the PaymentIntent with Stripe and mark invoice as paid if succeeded.
+     * Returns true if the invoice was just marked paid, false if already paid or not succeeded.
+     */
+    public function confirmPayment(Invoice $invoice): bool
+    {
+        if ($invoice->status->isTerminal()) {
+            return false;
+        }
+
+        if (! $invoice->stripe_payment_intent_id) {
+            return false;
+        }
+
+        $intent = $this->stripe->paymentIntents->retrieve($invoice->stripe_payment_intent_id);
+
+        if ($intent->status !== 'succeeded') {
+            return false;
+        }
+
+        $this->markPaid($invoice);
+
+        return true;
     }
 
     /**

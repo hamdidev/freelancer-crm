@@ -223,3 +223,51 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
     overdue: "Overdue",
     void: "Void",
 };
+
+export type ContractStatus = "draft" | "sent" | "signed" | "rejected";
+
+export interface Contract {
+    id: number;
+    user_id: number;
+    client_id: number;
+    proposal_id: number | null;
+    title: string;
+    body: string;
+    status: ContractStatus;
+    token: string;
+    sent_at: string | null;
+    signed_at: string | null;
+    rejected_at: string | null;
+    signature_path: string | null;
+    signer_ip: string | null;
+    document_hash: string | null;
+    rejection_reason: string | null;
+    created_at: string;
+    client?: {
+        id: number;
+        contact_name: string;
+        company_name: string | null;
+    };
+    user?: {
+        id: number;
+        name: string;
+        company_name: string | null;
+        brand_color: string;
+        email: string;
+        steuernummer: string | null;
+    };
+}
+
+export const CONTRACT_STATUS_COLORS: Record<ContractStatus, string> = {
+    draft: "bg-gray-100 text-gray-600",
+    sent: "bg-blue-100 text-blue-700",
+    signed: "bg-green-100 text-green-700",
+    rejected: "bg-red-100 text-red-700",
+};
+
+export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
+    draft: "Draft",
+    sent: "Sent",
+    signed: "Signed",
+    rejected: "Rejected",
+};

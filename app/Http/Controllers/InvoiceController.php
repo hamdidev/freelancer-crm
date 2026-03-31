@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -70,8 +71,8 @@ class InvoiceController extends Controller
 
         $invoice = $this->service->create($request->user(), $data);
 
-        return redirect()->route('invoices.edit', $invoice)
-            ->with('success', "Invoice {$invoice->number} created.");
+        return redirect()->route('invoices.index', $invoice)
+            ->with('success', 'Invoice created.');
     }
 
     public function edit(Request $request, Invoice $invoice): Response
@@ -133,13 +134,12 @@ class InvoiceController extends Controller
             ->with('success', 'Invoice deleted.');
     }
 
-    // ── Client payment page (inside portal) ─────────────────
+    // ── Client payment portal ────────────────────────────────
 
     public function pay(Request $request, Invoice $invoice)
     {
-        // Verify client owns this invoice
-        if ($request->user('client')?->user_id !== $invoice->user_id) {
-            abort(403);
+        if ($invoice->status === InvoiceStatus::Paid) {
+            abort(410, 'This invoice has already been paid.');
         }
 
         $clientSecret = $this->service->createPaymentIntent($invoice);
@@ -149,5 +149,12 @@ class InvoiceController extends Controller
             'clientSecret' => $clientSecret,
             'stripeKey' => config('services.stripe.key'),
         ]);
+    }
+
+    public function confirmPayment(Invoice $invoice): JsonResponse
+    {
+        $marked = $this->service->confirmPayment($invoice);
+
+        return response()->json(['paid' => $marked || $invoice->fresh()->status === InvoiceStatus::Paid]);
     }
 }
