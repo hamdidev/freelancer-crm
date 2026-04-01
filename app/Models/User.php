@@ -69,4 +69,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Contract::class);
     }
+    public function timeEntries(): HasMany
+    {
+        return $this->hasMany(TimeEntry::class);
+    }
 }

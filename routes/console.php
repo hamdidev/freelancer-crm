@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+use App\Models\TimeEntry;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::call(function () {
+    TimeEntry::whereNull('ended_at')
+        ->where('started_at', '<', now()->subHours(12))
+        ->each(fn($e) => $e->forceStop());
+})->daily()->name('force-stop-abandoned-timers');

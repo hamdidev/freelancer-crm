@@ -25,13 +25,19 @@ class Client extends Authenticatable
         'vat_number',
         'portal_password',
         'notes',
+        'portal_enabled',
+        'last_portal_access_at',
     ];
 
     protected $hidden = ['portal_password'];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed'];
+        return [
+            'portal_password'        => 'hashed',
+            'portal_enabled'         => 'boolean',
+            'last_portal_access_at'  => 'datetime',
+        ];
     }
 
     // Client auth uses portal_password mapped as "password"
@@ -50,8 +56,22 @@ class Client extends Authenticatable
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function loginTokens(): HasMany
+    public function portalTokens(): HasMany
     {
-        return $this->hasMany(ClientLoginToken::class);
+        return $this->hasMany(ClientPortalToken::class);
+    }
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(Proposal::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
     }
 }

@@ -26,12 +26,12 @@ export interface PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > {
     auth: {
-        user: User | null;
-        client: Client | null;
+        user: User | null; // freelancer (web guard)
+        client: Client | null; // portal (client guard)
     };
     flash: {
-        success: string | null;
-        error: string | null;
+        success?: string;
+        error?: string;
     };
 }
 
@@ -271,3 +271,25 @@ export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
     signed: "Signed",
     rejected: "Rejected",
 };
+export interface TimeEntry {
+    id: number;
+    user_id: number;
+    project_id: number | null;
+    description: string | null;
+    started_at: string;
+    ended_at: string | null;
+    duration_seconds: number;
+    billable: boolean;
+    invoiced_at: string | null;
+    created_at: string;
+    project?: {
+        id: number;
+        name: string;
+    };
+}
+
+export interface TimeStats {
+    today_seconds: number;
+    week_seconds: number;
+    billable_uninvoiced: number;
+}
