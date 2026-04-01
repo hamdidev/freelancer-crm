@@ -293,3 +293,10 @@ export interface TimeStats {
     week_seconds: number;
     billable_uninvoiced: number;
 }
+
+export interface ClientPortalData {
+    id: number;
+    contact_name: string;
+    company_name: string | null;
+    email: string;
+}

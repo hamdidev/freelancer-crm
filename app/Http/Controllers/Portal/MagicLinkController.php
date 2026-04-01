@@ -3,19 +3,21 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Client;
 use App\Services\MagicLinkService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class MagicLinkController extends Controller
 {
     public function __construct(private MagicLinkService $magicLinkService) {}
 
     // Called by the freelancer from the client detail page
-    public function send(Request $request): \Illuminate\Http\JsonResponse
+    public function send(Request $request): RedirectResponse
     {
         $request->validate(['client_id' => ['required', 'exists:clients,id']]);
 
-        $client = \App\Models\Client::findOrFail($request->client_id);
+        $client = Client::findOrFail($request->client_id);
 
         // Ensure this client belongs to the authenticated freelancer
         abort_if($client->user_id !== auth()->id(), 403);
@@ -23,11 +25,11 @@ class MagicLinkController extends Controller
 
         $this->magicLinkService->sendLink($client);
 
-        return response()->json(['message' => 'Portal link sent.']);
+        return back()->with('success', 'Portal link sent.');
     }
 
     // The link the client clicks from their email
-    public function authenticate(Request $request, string $token): \Illuminate\Http\RedirectResponse
+    public function authenticate(Request $request, string $token): RedirectResponse
     {
         $client = $this->magicLinkService->authenticate($token, $request->ip());
 
@@ -44,7 +46,7 @@ class MagicLinkController extends Controller
         return redirect($intended);
     }
 
-    public function logout(): \Illuminate\Http\RedirectResponse
+    public function logout(): RedirectResponse
     {
         auth('client')->logout();
         session()->invalidate();

@@ -3,35 +3,39 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Models\Contract;
+use App\Models\Invoice;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PortalDashboardController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        /** @var \App\Models\Client $client */
-        $client = auth('client')->user();
+        $client = $request->user('client');
 
-        return Inertia::render('Portal/Dashboard', [
-            'client' => [
-                'name'  => $client->name,
-                'email' => $client->email,
-            ],
-            'stats' => [
-                'open_invoices'   => $client->invoices()
-                    ->whereIn('status', ['sent', 'overdue'])->count(),
-                'pending_proposals' => $client->proposals()
-                    ->where('status', 'sent')->count(),
-                'active_contracts'  => $client->contracts()
-                    ->where('status', 'active')->count(),
-            ],
-            'recent_invoices'  => $client->invoices()
-                ->latest()->limit(5)
-                ->get(['id', 'invoice_number', 'total_amount', 'status', 'due_date']),
-            'pending_proposals' => $client->proposals()
-                ->where('status', 'sent')->latest()->limit(3)
-                ->get(['id', 'title', 'total_amount', 'created_at']),
-        ]);
+        $contracts = Contract::where('client_id', $client->id)
+            ->whereIn('status', ['sent', 'signed'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $invoices = Invoice::where('client_id', $client->id)
+            ->with('items')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $stats = [
+            'pending_contracts' => $contracts->where('status', 'sent')->count(),
+            'unpaid_invoices' => $invoices->whereIn('status', ['sent', 'viewed', 'overdue'])->count(),
+            'total_paid' => $invoices->where('status', 'paid')->sum('total_cents'),
+        ];
+
+        return Inertia::render('Portal/Dashboard', compact(
+            'contracts',
+            'invoices',
+            'stats',
+            'client'
+        ));
     }
 }
