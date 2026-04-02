@@ -22,11 +22,10 @@ class PortalAuthController extends Controller
     {
         $request->validate([
             'email' => ['required', 'email'],
-            'user_id' => ['required', 'integer'],
         ]);
 
         try {
-            $this->magicLinkService->sendLinkByEmail($request->email, (int) $request->user_id);
+            $this->magicLinkService->sendLinkByEmail($request->email);
         } catch (\Exception) {
             // Don't reveal if email exists or portal is disabled
         }

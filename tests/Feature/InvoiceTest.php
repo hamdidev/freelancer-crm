@@ -93,6 +93,29 @@ it('fails validation when items are missing on store', function () {
         ->assertSessionHasErrors('items');
 });
 
+it('fails validation when creating an invoice for another users client', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $foreignClient = Client::factory()->create(['user_id' => $otherUser->id]);
+
+    $this->actingAs($user)
+        ->post(route('invoices.store'), [
+            'client_id' => $foreignClient->id,
+            'currency' => 'EUR',
+            'tax_rate' => 19.0,
+            'issue_date' => now()->toDateString(),
+            'due_at' => now()->addDays(14)->toDateString(),
+            'items' => [
+                [
+                    'description' => 'Design work',
+                    'quantity' => 1,
+                    'unit_price_cents' => 100000,
+                ],
+            ],
+        ])
+        ->assertSessionHasErrors('client_id');
+});
+
 // ── Update ─────────────────────────────────────────────────────────────────
 
 it('updates an invoice owned by the user', function () {

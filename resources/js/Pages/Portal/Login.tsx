@@ -6,7 +6,6 @@ export default function PortalLogin() {
 
     const { data, setData, post, processing, errors } = useForm({
         email: "",
-        user_id: "1", // default freelancer — update per deployment
     });
 
     function submit(e: React.FormEvent) {

@@ -10,7 +10,10 @@
     "nightwatch_mcp": false,
     "sail": false,
     "skills": [
+        "scout-development",
         "pest-testing",
+        "inertia-react-development",
+        "echo-development",
         "tailwindcss-development"
     ]
 }

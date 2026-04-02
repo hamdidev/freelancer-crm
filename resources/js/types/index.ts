@@ -300,3 +300,24 @@ export interface ClientPortalData {
     company_name: string | null;
     email: string;
 }
+
+export interface ClientFull {
+    id: number;
+    user_id: number;
+    contact_name: string;
+    company_name: string | null;
+    email: string;
+    phone: string | null;
+    address: string | null;
+    city: string | null;
+    country: string;
+    vat_number: string | null;
+    notes: string | null;
+    portal_enabled: boolean;
+    last_portal_access_at: string | null;
+    leads_count?: number;
+    proposals_count?: number;
+    invoices_count?: number;
+    contracts_count?: number;
+    created_at: string;
+}

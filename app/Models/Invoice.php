@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Invoice extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, Searchable, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -36,6 +37,17 @@ class Invoice extends Model
         'recurring',
         'recurring_interval',
     ];
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'number' => $this->number,
+            'status' => $this->status->value,
+            'user_id' => $this->user_id,
+            'created_at_timestamp' => $this->created_at->timestamp,
+        ];
+    }
 
     protected function casts(): array
     {

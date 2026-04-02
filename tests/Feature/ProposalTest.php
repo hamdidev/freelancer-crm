@@ -54,8 +54,8 @@ it('auto-generates a uuid token on proposal creation', function () {
 
     $this->actingAs($user)->post(route('proposals.store'), [
         'client_id' => $client->id,
-        'title'     => 'Token Test',
-        'currency'  => 'EUR',
+        'title' => 'Token Test',
+        'currency' => 'EUR',
     ]);
 
     $proposal = Proposal::where('user_id', $user->id)->first();
@@ -74,9 +74,9 @@ it('calculates total_cents from pricing_item blocks on store', function () {
 
     $this->actingAs($user)->post(route('proposals.store'), [
         'client_id' => $client->id,
-        'title'     => 'Priced Proposal',
-        'content'   => $content,
-        'currency'  => 'EUR',
+        'title' => 'Priced Proposal',
+        'content' => $content,
+        'currency' => 'EUR',
     ]);
 
     $proposal = Proposal::where('user_id', $user->id)->first();
@@ -92,11 +92,30 @@ it('fails validation when client_id is missing on store', function () {
         ->assertSessionHasErrors('client_id');
 });
 
+it('fails validation when creating a proposal for another users client', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $foreignClient = Client::factory()->create(['user_id' => $otherUser->id]);
+
+    $this->actingAs($user)
+        ->post(route('proposals.store'), [
+            'client_id' => $foreignClient->id,
+            'title' => 'Cross Tenant Attempt',
+            'content' => [],
+            'currency' => 'EUR',
+        ])
+        ->assertSessionHasErrors('client_id');
+});
+
 // ── Update ─────────────────────────────────────────────────────────────────
 
 it('updates a draft proposal owned by the user', function () {
     $user = User::factory()->create();
-    $proposal = Proposal::factory()->create(['user_id' => $user->id]);
+    $client = Client::factory()->create(['user_id' => $user->id]);
+    $proposal = Proposal::factory()->create([
+        'user_id' => $user->id,
+        'client_id' => $client->id,
+    ]);
 
     $this->actingAs($user)
         ->patch(route('proposals.update', $proposal), [

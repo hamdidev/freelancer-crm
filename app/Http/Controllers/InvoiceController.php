@@ -9,6 +9,7 @@ use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -53,8 +54,16 @@ class InvoiceController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'client_id' => ['required', 'integer', 'exists:clients,id'],
-            'project_id' => ['nullable', 'integer'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where('user_id', $request->user()->id),
+            ],
+            'project_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('projects', 'id')->where('user_id', $request->user()->id),
+            ],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
@@ -92,7 +101,11 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
 
         $data = $request->validate([
-            'client_id' => ['required', 'integer', 'exists:clients,id'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where('user_id', $request->user()->id),
+            ],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
@@ -136,8 +149,10 @@ class InvoiceController extends Controller
 
     // ── Client payment portal ────────────────────────────────
 
-    public function pay(Request $request, Invoice $invoice)
+    public function pay(Request $request, Invoice $invoice): Response
     {
+        $this->authorizePortalInvoiceAccess($request, $invoice);
+
         if ($invoice->status === InvoiceStatus::Paid) {
             abort(410, 'This invoice has already been paid.');
         }
@@ -151,10 +166,21 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function confirmPayment(Invoice $invoice): JsonResponse
+    public function confirmPayment(Request $request, Invoice $invoice): JsonResponse
     {
+        $this->authorizePortalInvoiceAccess($request, $invoice);
+
         $marked = $this->service->confirmPayment($invoice);
 
         return response()->json(['paid' => $marked || $invoice->fresh()->status === InvoiceStatus::Paid]);
+    }
+
+    private function authorizePortalInvoiceAccess(Request $request, Invoice $invoice): void
+    {
+        $client = $request->user('client');
+
+        if (! $client || $invoice->client_id !== $client->id) {
+            abort(403);
+        }
     }
 }

@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Lead extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, Searchable, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -27,14 +28,27 @@ class Lead extends Model
         'lost_at',
     ];
 
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'title' => $this->title,
+            'status' => $this->status->value,
+            'source' => $this->source ?? '',
+            'notes' => $this->notes ?? '',
+            'user_id' => $this->user_id,
+            'created_at_timestamp' => $this->created_at->timestamp,
+        ];
+    }
+
     protected function casts(): array
     {
         return [
-            'status'         => LeadStatus::class,
+            'status' => LeadStatus::class,
             'value_estimate' => 'integer',
-            'position'       => 'integer',
-            'won_at'         => 'datetime',
-            'lost_at'        => 'datetime',
+            'position' => 'integer',
+            'won_at' => 'datetime',
+            'lost_at' => 'datetime',
         ];
     }
 

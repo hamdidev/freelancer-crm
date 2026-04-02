@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Contract extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, Searchable, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -32,6 +33,17 @@ class Contract extends Model
         'document_hash',
         'rejection_reason',
     ];
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'title' => $this->title,
+            'status' => $this->status->value,
+            'user_id' => $this->user_id,
+            'created_at_timestamp' => $this->created_at->timestamp,
+        ];
+    }
 
     protected function casts(): array
     {

@@ -1,4 +1,4 @@
-import { Head, router } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -25,17 +25,29 @@ function CheckoutForm({ invoice }: { invoice: Invoice }) {
     const [ready, setReady] = useState(false);
 
     async function confirmWithServer() {
-        await fetch(
+        const response = await fetch(
             route("portal.invoices.confirm-payment", invoice.id),
             { method: "POST", headers: { "X-CSRF-TOKEN": (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? "" } },
         );
+
+        if (!response.ok) {
+            throw new Error("Payment confirmation failed.");
+        }
+
+        const payload = (await response.json()) as { paid: boolean };
+
+        if (!payload.paid) {
+            throw new Error("Payment is still pending.");
+        }
     }
 
     // Check URL params for Stripe redirect result (3D Secure etc.)
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.get("payment_intent_client_secret")) {
-            confirmWithServer().then(() => setSuccess(true));
+            confirmWithServer()
+                .then(() => setSuccess(true))
+                .catch((serverError: Error) => setError(serverError.message));
         }
     }, []);
 
@@ -70,8 +82,16 @@ function CheckoutForm({ invoice }: { invoice: Invoice }) {
             setError(stripeError.message ?? "Payment failed.");
             setLoading(false);
         } else {
-            await confirmWithServer();
-            setSuccess(true);
+            try {
+                await confirmWithServer();
+                setSuccess(true);
+            } catch (serverError) {
+                const message =
+                    serverError instanceof Error
+                        ? serverError.message
+                        : "Payment confirmation failed.";
+                setError(message);
+            }
             setLoading(false);
         }
     }

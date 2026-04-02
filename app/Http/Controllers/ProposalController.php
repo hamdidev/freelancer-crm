@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ProposalStatus;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Services\ProposalService;
-use App\StateMachines\ProposalStateMachine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,22 +40,30 @@ class ProposalController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'client_id'   => ['required', 'integer', 'exists:clients,id'],
-            'lead_id'     => ['nullable', 'integer', 'exists:leads,id'],
-            'title'       => ['required', 'string', 'max:255'],
-            'content'     => ['nullable', 'array'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where('user_id', $request->user()->id),
+            ],
+            'lead_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('leads', 'id')->where('user_id', $request->user()->id),
+            ],
+            'title' => ['required', 'string', 'max:255'],
+            'content' => ['nullable', 'array'],
             'valid_until' => ['nullable', 'date', 'after:today'],
-            'currency'    => ['nullable', 'string', 'size:3'],
+            'currency' => ['nullable', 'string', 'size:3'],
         ]);
 
-        $content     = $data['content'] ?? [];
-        $totalCents  = $this->service->calculateTotal($content);
+        $content = $data['content'] ?? [];
+        $totalCents = $this->service->calculateTotal($content);
 
         $proposal = $request->user()->proposals()->create([
             ...$data,
-            'content'     => $content,
+            'content' => $content,
             'total_cents' => $totalCents,
-            'currency'    => $data['currency'] ?? $request->user()->currency,
+            'currency' => $data['currency'] ?? $request->user()->currency,
         ]);
 
         return redirect()->route('proposals.edit', $proposal)
@@ -69,7 +76,7 @@ class ProposalController extends Controller
 
         return Inertia::render('Proposals/Edit', [
             'proposal' => $proposal->load('client:id,contact_name,company_name'),
-            'clients'  => Client::where('user_id', $request->user()->id)
+            'clients' => Client::where('user_id', $request->user()->id)
                 ->select('id', 'contact_name', 'company_name')
                 ->get(),
         ]);
@@ -80,18 +87,22 @@ class ProposalController extends Controller
         $this->authorize('update', $proposal);
 
         $data = $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'content'     => ['nullable', 'array'],
+            'title' => ['required', 'string', 'max:255'],
+            'content' => ['nullable', 'array'],
             'valid_until' => ['nullable', 'date'],
-            'client_id'   => ['required', 'integer', 'exists:clients,id'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where('user_id', $request->user()->id),
+            ],
         ]);
 
-        $content    = $data['content'] ?? [];
+        $content = $data['content'] ?? [];
         $totalCents = $this->service->calculateTotal($content);
 
         $proposal->update([
             ...$data,
-            'content'     => $content,
+            'content' => $content,
             'total_cents' => $totalCents,
         ]);
 
@@ -137,11 +148,11 @@ class ProposalController extends Controller
 
         $data = $request->validate([
             'action' => ['required', 'in:accept,decline'],
-            'note'   => ['nullable', 'string', 'max:1000'],
+            'note' => ['nullable', 'string', 'max:1000'],
         ]);
 
         match ($data['action']) {
-            'accept'  => $this->service->accept($proposal, $data['note'] ?? null),
+            'accept' => $this->service->accept($proposal, $data['note'] ?? null),
             'decline' => $this->service->decline($proposal, $data['note'] ?? null),
         };
 

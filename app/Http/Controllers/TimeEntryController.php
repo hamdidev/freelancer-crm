@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\TimeEntry;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,8 +22,7 @@ class TimeEntryController extends Controller
 
         // Group by date for display
         $grouped = $entries->groupBy(
-            fn($e) =>
-            $e->started_at->format('Y-m-d')
+            fn ($e) => $e->started_at->format('Y-m-d')
         );
 
         // Check if there's a running timer
@@ -35,13 +36,11 @@ class TimeEntryController extends Controller
             ->get();
 
         $stats = [
-            'today_seconds'   => $entries->filter(
-                fn($e) =>
-                $e->started_at->isToday()
+            'today_seconds' => $entries->filter(
+                fn ($e) => $e->started_at->isToday()
             )->sum('duration_seconds'),
-            'week_seconds'    => $entries->filter(
-                fn($e) =>
-                $e->started_at->isCurrentWeek()
+            'week_seconds' => $entries->filter(
+                fn ($e) => $e->started_at->isCurrentWeek()
             )->sum('duration_seconds'),
             'billable_uninvoiced' => $entries
                 ->where('billable', true)
@@ -50,10 +49,10 @@ class TimeEntryController extends Controller
         ];
 
         return Inertia::render('Time/Index', [
-            'grouped'  => $grouped,
-            'running'  => $running,
+            'grouped' => $grouped,
+            'running' => $running,
             'projects' => $projects,
-            'stats'    => $stats,
+            'stats' => $stats,
         ]);
     }
 
@@ -64,21 +63,25 @@ class TimeEntryController extends Controller
     {
         $data = $request->validate([
             'description' => ['nullable', 'string', 'max:255'],
-            'project_id'  => ['nullable', 'integer', 'exists:projects,id'],
-            'billable'    => ['nullable', 'boolean'],
+            'project_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('projects', 'id')->where('user_id', $request->user()->id),
+            ],
+            'billable' => ['nullable', 'boolean'],
         ]);
 
         // Stop any currently running timer
         TimeEntry::forUser($request->user()->id)
             ->whereNull('ended_at')
-            ->each(fn($e) => $e->forceStop());
+            ->each(fn ($e) => $e->forceStop());
 
         TimeEntry::create([
-            'user_id'     => $request->user()->id,
+            'user_id' => $request->user()->id,
             'description' => $data['description'] ?? null,
-            'project_id'  => $data['project_id']  ?? null,
-            'billable'    => $data['billable']     ?? true,
-            'started_at'  => now(),
+            'project_id' => $data['project_id'] ?? null,
+            'billable' => $data['billable'] ?? true,
+            'started_at' => now(),
         ]);
 
         return back()->with('success', 'Timer started.');
@@ -94,7 +97,7 @@ class TimeEntryController extends Controller
         }
 
         $entry->update([
-            'ended_at'         => now(),
+            'ended_at' => now(),
             'duration_seconds' => now()->diffInSeconds($entry->started_at),
         ]);
 
@@ -112,8 +115,12 @@ class TimeEntryController extends Controller
 
         $data = $request->validate([
             'description' => ['nullable', 'string', 'max:255'],
-            'project_id'  => ['nullable', 'integer'],
-            'billable'    => ['nullable', 'boolean'],
+            'project_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('projects', 'id')->where('user_id', $request->user()->id),
+            ],
+            'billable' => ['nullable', 'boolean'],
         ]);
 
         $entry->update($data);
@@ -124,7 +131,7 @@ class TimeEntryController extends Controller
     /**
      * Sync timer duration from frontend (called every 60s).
      */
-    public function sync(Request $request, TimeEntry $entry): \Illuminate\Http\JsonResponse
+    public function sync(Request $request, TimeEntry $entry): JsonResponse
     {
         if ($entry->user_id !== $request->user()->id) {
             abort(403);

@@ -8,6 +8,7 @@ use App\Services\ContractService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,8 +38,16 @@ class ContractController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'client_id' => ['required', 'integer', 'exists:clients,id'],
-            'proposal_id' => ['nullable', 'integer', 'exists:proposals,id'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where('user_id', $request->user()->id),
+            ],
+            'proposal_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('proposals', 'id')->where('user_id', $request->user()->id),
+            ],
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
         ]);
@@ -71,7 +80,11 @@ class ContractController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
-            'client_id' => ['required', 'integer', 'exists:clients,id'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where('user_id', $request->user()->id),
+            ],
         ]);
 
         $contract->update($data);

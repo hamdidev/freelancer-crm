@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Portal\MagicLinkController;
 use App\Http\Controllers\Portal\PortalAuthController;
 use App\Http\Controllers\Portal\PortalDashboardController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TimeEntryController;
 use App\Models\Contract;
@@ -30,6 +32,17 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/search', SearchController::class)->name('search');
+
+    // Clients
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::patch('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
 
     // Leads
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
@@ -111,6 +124,8 @@ Route::prefix('portal')->name('portal.')->group(function () {
         Route::post('/logout', [MagicLinkController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [PortalDashboardController::class, 'index'])->name('dashboard');
         Route::get('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
+        Route::post('/invoices/{invoice}/confirm-payment', [InvoiceController::class, 'confirmPayment'])
+            ->name('invoices.confirm-payment');
     });
 });
 

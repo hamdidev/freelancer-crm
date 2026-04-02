@@ -12,14 +12,15 @@ class MagicLinkService
 {
     private const TTL_HOURS = 24;
 
-    public function sendLinkByEmail(string $email, int $userId): void
+    public function sendLinkByEmail(string $email): void
     {
-        $client = Client::where('user_id', $userId)
-            ->where('email', $email)
+        $clients = Client::where('email', $email)
             ->where('portal_enabled', true)
-            ->firstOrFail();
+            ->get();
 
-        $this->sendLink($client);
+        foreach ($clients as $client) {
+            $this->sendLink($client);
+        }
     }
 
     public function sendLink(Client $client): void

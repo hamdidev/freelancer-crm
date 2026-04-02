@@ -3,18 +3,18 @@
 namespace App\Models;
 
 use App\Enums\ProposalStatus;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Proposal extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, Searchable, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -34,14 +34,25 @@ class Proposal extends Model
         'pdf_path',
     ];
 
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'title' => $this->title,
+            'status' => $this->status->value,
+            'user_id' => $this->user_id,
+            'created_at_timestamp' => $this->created_at->timestamp,
+        ];
+    }
+
     protected function casts(): array
     {
         return [
-            'content'     => 'array',
-            'status'      => ProposalStatus::class,
+            'content' => 'array',
+            'status' => ProposalStatus::class,
             'total_cents' => 'integer',
             'valid_until' => 'date',
-            'viewed_at'   => 'datetime',
+            'viewed_at' => 'datetime',
             'accepted_at' => 'datetime',
             'declined_at' => 'datetime',
         ];
@@ -69,7 +80,7 @@ class Proposal extends Model
     // Formatted total for display
     public function formattedTotal(): string
     {
-        return number_format($this->total_cents / 100, 2, ',', '.') . ' ' . $this->currency;
+        return number_format($this->total_cents / 100, 2, ',', '.').' '.$this->currency;
     }
 
     public function user(): BelongsTo
