@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+typesense-server
+typesense-server-26.0-linux-amd64.tar.gz
+/tmp/typesense-data
