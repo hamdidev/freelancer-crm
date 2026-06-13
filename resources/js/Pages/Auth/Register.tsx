@@ -22,7 +22,7 @@ export default function Register() {
                         Create an account
                     </h1>
                     <p className="text-gray-500 text-sm mb-8">
-                        Get started with FreelancerCRM
+                        Get started with FreelancerDash
                     </p>
 
                     <form onSubmit={submit} className="space-y-4">

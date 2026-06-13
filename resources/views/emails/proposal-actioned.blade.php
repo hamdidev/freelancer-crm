@@ -117,7 +117,7 @@
         </div>
 
         <div class="footer">
-            <p>FreelancerCRM — {{ now()->format('d.m.Y') }}</p>
+            <p>FreelancerDash — {{ now()->format('d.m.Y') }}</p>
         </div>
     </div>
 </body>

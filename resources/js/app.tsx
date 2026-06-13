@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import "../css/app.css";
 
 createInertiaApp({
-    title: (title) => `${title} — FreelancerCRM`,
+    title: (title) => `${title} — FreelancerDash`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.tsx`,

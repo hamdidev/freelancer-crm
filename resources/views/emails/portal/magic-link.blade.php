@@ -123,7 +123,7 @@
         </div>
 
         <div class="footer">
-            <p>Powered by FreelancerCRM</p>
+            <p>Powered by FreelancerDash</p>
         </div>
     </div>
 </body>

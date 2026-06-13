@@ -16,9 +16,16 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TimeEntryController;
 use App\Models\Contract;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-// Root redirect
-Route::get('/', fn () => redirect('/login'));
+// Landing page (redirect authenticated freelancers to their dashboard)
+Route::get('/', function () {
+    if (auth('web')->check()) {
+        return redirect()->route('dashboard');
+    }
+
+    return Inertia::render('Welcome');
+})->name('home');
 
 // ── Guest routes ──────────────────────────────────────────────
 Route::middleware('guest')->group(function () {

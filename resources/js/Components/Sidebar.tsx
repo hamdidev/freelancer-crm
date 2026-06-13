@@ -36,7 +36,7 @@ export default function Sidebar() {
             {/* Logo */}
             <div className="px-6 mb-10">
                 <h1 className="text-xl font-bold text-primary tracking-tight">
-                    FreelancerCRM
+                    FreelancerDash
                 </h1>
                 <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mt-1">
                     Executive Suite

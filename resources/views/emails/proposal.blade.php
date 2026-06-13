@@ -194,7 +194,7 @@
             @if ($proposal->user->steuernummer)
                 <p>Steuernummer: {{ $proposal->user->steuernummer }}</p>
             @endif
-            <p style="margin-top: 8px;">Powered by FreelancerCRM</p>
+            <p style="margin-top: 8px;">Powered by FreelancerDash</p>
         </div>
     </div>
 </body>

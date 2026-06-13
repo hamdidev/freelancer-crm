@@ -304,7 +304,7 @@
             @if ($invoice->user->ust_idnr)
                 <p>USt-IdNr: {{ $invoice->user->ust_idnr }}</p>
             @endif
-            <p style="margin-top: 8px;">Powered by FreelancerCRM</p>
+            <p style="margin-top: 8px;">Powered by FreelancerDash</p>
         </div>
     </div>
 </body>

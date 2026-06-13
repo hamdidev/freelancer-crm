@@ -21,7 +21,7 @@ export default function Login() {
                         Welcome back
                     </h1>
                     <p className="text-gray-500 text-sm mb-8">
-                        Sign in to FreelancerCRM
+                        Sign in to FreelancerDash
                     </p>
 
                     <form onSubmit={submit} className="space-y-4">
